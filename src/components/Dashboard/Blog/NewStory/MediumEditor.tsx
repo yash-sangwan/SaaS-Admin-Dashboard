@@ -10,8 +10,19 @@ import TitleElement from './TitleElement'
 import ContentElement from './ContentElement'
 import ImageElement from './ImageElement'
 import SplashImage from './sidebar/media/SplashImage'
-import { CustomEditor, CustomElement, ImageElement as ImageElementType, SplashImageElement } from './CustomTypes'
+import { CustomEditor, CustomElement, ImageElement as ImageElementType, SplashImageElement, VideoElement as VideoElementType, EmbedElement } from './CustomTypes'
 import { SidebarItem } from './types/sidebarItems'
+import VideoElement from './sidebar/embed/VideoElement'
+import VideoSearch from './sidebar/embed/VideoSearch'
+import LinkEmbed from './sidebar/embed/LinkEmbed'
+import LinkEmbedDialog from './sidebar/embed/LinkEmbedDialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog"
 
 const STORAGE_KEY = 'medium-editor-content'
 
@@ -26,11 +37,11 @@ const initialValue: CustomElement[] = [
   },
 ]
 
-const withImages = (editor: CustomEditor) => {
+const withCustomElements = (editor: CustomEditor) => {
   const { isVoid } = editor
 
   editor.isVoid = (element) => {
-    return (element.type === 'image' || element.type === 'splash-image') ? true : isVoid(element)
+    return ['image', 'splash-image', 'video', 'embed'].includes(element.type) || isVoid(element)
   }
 
   return editor
@@ -38,12 +49,14 @@ const withImages = (editor: CustomEditor) => {
 
 const MediumEditor: React.FC = () => {
   const editor = useMemo(
-    () => withImages(withHistory(withReact(createEditor()))) as CustomEditor,
+    () => withCustomElements(withHistory(withReact(createEditor()))) as CustomEditor,
     []
   )
   const [isSaved, setIsSaved] = useState(true)
   const [showPlaceholder, setShowPlaceholder] = useState(true)
   const [editorContent, setEditorContent] = useState<Descendant[]>(initialValue)
+  const [showVideoSearch, setShowVideoSearch] = useState(false)
+  const [showLinkEmbed, setShowLinkEmbed] = useState(false)
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY)
@@ -60,6 +73,10 @@ const MediumEditor: React.FC = () => {
         return <ImageElement {...props as RenderElementProps & { element: ImageElementType }} />
       case 'splash-image':
         return <SplashImage {...props as RenderElementProps & { element: SplashImageElement }} />
+      case 'video':
+        return <VideoElement {...props as RenderElementProps & { element: VideoElementType }} />
+      case 'embed':
+        return <LinkEmbed {...props as RenderElementProps & { element: EmbedElement }} />
       default:
         return <ContentElement {...props} showPlaceholder={showPlaceholder} />
     }
@@ -79,13 +96,13 @@ const MediumEditor: React.FC = () => {
         } as CustomElement)
       }
 
-      const [imageNode] = Editor.nodes(editor, {
-        match: n => SlateElement.isElement(n) && (n.type === 'image' || n.type === 'splash-image'),
+      const [mediaNode] = Editor.nodes(editor, {
+        match: n => SlateElement.isElement(n) && ['image', 'splash-image', 'video', 'embed'].includes(n.type),
       })
 
-      if (imageNode) {
+      if (mediaNode) {
         event.preventDefault()
-        const path = ReactEditor.findPath(editor, imageNode[0])
+        const path = ReactEditor.findPath(editor, mediaNode[0])
         Transforms.insertNodes(
           editor,
           { type: 'paragraph', children: [{ text: '' }] } as CustomElement,
@@ -156,8 +173,11 @@ const MediumEditor: React.FC = () => {
         }
         break
       case 'embed':
-        newNode = { type: 'embed', url: '', children: [{ text: '' }] }
-        Transforms.insertNodes(editor, newNode)
+        if (item.id === 'video') {
+          setShowVideoSearch(true)
+        } else if (item.id === 'link') {
+          setShowLinkEmbed(true)
+        }
         break
       case 'structure':
         newNode = { type: item.id as CustomElement['type'], children: [{ text: '' }] } as CustomElement
@@ -167,6 +187,29 @@ const MediumEditor: React.FC = () => {
         newNode = { type: 'paragraph', children: [{ text: '' }] }
         Transforms.insertNodes(editor, newNode)
     }
+  }, [editor])
+
+  const handleVideoSelect = useCallback((url: string, thumbnail: string) => {
+    const newNode: VideoElementType = {
+      type: 'video',
+      url,
+      thumbnail,
+      position: 'center',
+      children: [{ text: '' }]
+    }
+    Transforms.insertNodes(editor, newNode)
+    setShowVideoSearch(false)
+  }, [editor])
+
+  const handleLinkEmbed = useCallback((url: string) => {
+    const newNode: EmbedElement = {
+      type: 'embed',
+      url,
+      position: 'center',
+      children: [{ text: '' }]
+    }
+    Transforms.insertNodes(editor, newNode)
+    setShowLinkEmbed(false)
   }, [editor])
 
   return (
@@ -188,6 +231,28 @@ const MediumEditor: React.FC = () => {
           </Slate>
         </main>
       </div>
+      <Dialog open={showVideoSearch} onOpenChange={setShowVideoSearch}>
+        <DialogContent className="sm:max-w-[850px] p-6 gap-0 bg-black border-[#282828]">
+          <DialogHeader>
+            <DialogTitle>Insert Video</DialogTitle>
+            <DialogDescription>
+              {/* Paste a YouTube video link to embed in your content. */}
+            </DialogDescription>
+          </DialogHeader>
+          <VideoSearch onVideoSelect={handleVideoSelect} />
+        </DialogContent>
+      </Dialog>
+      <Dialog open={showLinkEmbed} onOpenChange={setShowLinkEmbed}>
+        <DialogContent className="sm:max-w-[850px] p-6 gap-0 bg-black border-[#282828]">
+          <DialogHeader>
+            <DialogTitle>Embed Link</DialogTitle>
+            <DialogDescription>
+              {/* Paste a link to embed in your content (e.g., YouTube, image URL, etc.). */}
+            </DialogDescription>
+          </DialogHeader>
+          <LinkEmbedDialog onLinkEmbed={handleLinkEmbed} />
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

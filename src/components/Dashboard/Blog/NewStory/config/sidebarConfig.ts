@@ -21,18 +21,18 @@ export const sidebarConfig: SidebarConfig[] = [
         name: 'Splash Image',
         icon: ImageIcon,
         type: 'media'
+      },
+      {
+        id: 'video',
+        name: 'Video',
+        icon: Video,
+        type: 'embed'
       }
     ]
   },
   {
     title: 'Embed',
     items: [
-      {
-        id: 'video',
-        name: 'Video',
-        icon: Video,
-        type: 'embed'
-      },
       {
         id: 'link',
         name: 'Link',

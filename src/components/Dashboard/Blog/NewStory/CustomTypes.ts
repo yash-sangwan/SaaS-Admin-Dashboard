@@ -11,6 +11,7 @@ export type ImageElement = {
   type: 'image'
   url: string
   position: Position
+  width?: string
   children: CustomText[]
 }
 export type SplashImageElement = {
@@ -19,8 +20,19 @@ export type SplashImageElement = {
   position: Position
   children: CustomText[]
 }
-export type VideoElement = { type: 'video'; url: string; children: CustomText[] }
-export type EmbedElement = { type: 'embed'; url: string; children: CustomText[] }
+export type VideoElement = {
+  type: 'video'
+  url: string
+  thumbnail: string
+  position: 'left' | 'center' | 'right'
+  children: CustomText[]
+}
+export type EmbedElement = { 
+  type: 'embed'
+  url: string
+  position: 'left' | 'center' | 'right'
+  children: CustomText[] 
+}
 export type CodeBlockElement = { type: 'code-block'; language: string; children: CustomText[] }
 export type DividerElement = { type: 'divider'; children: CustomText[] }
 
