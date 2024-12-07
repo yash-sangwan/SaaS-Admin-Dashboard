@@ -1,17 +1,38 @@
 import { BaseEditor } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { HistoryEditor } from 'slate-history'
-
-export type CustomElement =
-  | { type: 'title'; children: CustomText[] }
-  | { type: 'paragraph'; children: CustomText[] }
-  | { type: 'image'; url?: string; children: CustomText[] }
-  | { type: 'video'; url?: string; children: CustomText[] }
-  | { type: 'splash-image'; url?: string; children: CustomText[] }
-  | { type: 'section'; children: CustomText[] }
-  | { type: 'embed'; url?: string; children: CustomText[] }
+import { Position } from './components/AlignmentBar'
 
 export type CustomText = { text: string }
+
+export type TitleElement = { type: 'title'; children: CustomText[] }
+export type ParagraphElement = { type: 'paragraph'; children: CustomText[] }
+export type ImageElement = { 
+  type: 'image'
+  url: string
+  position: Position
+  children: CustomText[]
+}
+export type SplashImageElement = {
+  type: 'splash-image'
+  url?: string
+  position: Position
+  children: CustomText[]
+}
+export type VideoElement = { type: 'video'; url: string; children: CustomText[] }
+export type EmbedElement = { type: 'embed'; url: string; children: CustomText[] }
+export type CodeBlockElement = { type: 'code-block'; language: string; children: CustomText[] }
+export type DividerElement = { type: 'divider'; children: CustomText[] }
+
+export type CustomElement = 
+  | TitleElement
+  | ParagraphElement
+  | ImageElement
+  | SplashImageElement
+  | VideoElement
+  | EmbedElement
+  | CodeBlockElement
+  | DividerElement
 
 export type CustomEditor = BaseEditor & ReactEditor & HistoryEditor
 
@@ -23,19 +44,3 @@ declare module 'slate' {
   }
 }
 
-export type BlockProps = {
-  attributes: React.HTMLAttributes<HTMLElement>
-  children: React.ReactNode
-  element: CustomElement
-}
-
-export const initialValue: CustomElement[] = [
-  {
-    type: 'title',
-    children: [{ text: '' }],
-  },
-  {
-    type: 'paragraph',
-    children: [{ text: '' }],
-  },
-]

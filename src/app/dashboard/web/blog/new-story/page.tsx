@@ -1,13 +1,13 @@
-import NewStory from '@/components/Dashboard/Blog/NewStory/NewStory'
 import React from 'react'
+import MediumEditor from '../../../../../components/Dashboard/Blog/NewStory/MediumEditor'
 
-
-const page = () => {
+const BlogEditorPage: React.FC = () => {
   return (
-<>
-<NewStory/>
-</>
-)
+    <div className="min-h-screen bg-black text-white">
+      <MediumEditor />
+    </div>
+  )
 }
 
-export default page
+export default BlogEditorPage
+

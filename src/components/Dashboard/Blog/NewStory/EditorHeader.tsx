@@ -1,4 +1,6 @@
-import React from 'react'
+'use client'
+
+import React, { useState, useEffect } from 'react'
 import { Bell, MoreHorizontal } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -20,13 +22,26 @@ interface EditorHeaderProps {
 }
 
 const EditorHeader: React.FC<EditorHeaderProps> = ({ isSaved }) => {
+  const [isScrolled, setIsScrolled] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 0)
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   return (
-    <header className="flex items-center justify-center h-16 px-6 border-b border-neutral-800">
-      <div className="max-w-4xl w-full flex items-center">
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${
+      isScrolled ? 'bg-black/80 backdrop-blur-sm' : 'bg-black'
+    } flex items-center justify-between h-16 px-6 border-b border-neutral-800`}>
+      <div className="px-4 w-full flex items-center">
         <div className="flex items-center gap-4 flex-1">
-          <h1 className="text-2xl font-serif">Name</h1>
+          <h1 className="text-2xl font-serif">SHWET</h1>
           <div className="text-sm text-neutral-400">
-            Draft in Insanesilent
+            Draft in John doe
             {isSaved && <span className="ml-2 text-neutral-500">Saved</span>}
           </div>
         </div>
@@ -99,3 +114,4 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({ isSaved }) => {
 }
 
 export default EditorHeader
+

@@ -1,28 +1,26 @@
 import React from 'react'
-import { useSlate } from 'slate-react'
-import { BlockProps } from './CustomTypes'
+import { RenderElementProps } from 'slate-react'
 
-const TitleElement: React.FC<BlockProps> = ({
-  attributes,
-  children,
-  element,
-}) => {
-  const editor = useSlate()
-  const isEmpty = element.children[0].text === ''
-  const isFirstNode = editor.children[0] === element
-
+const TitleElement: React.FC<RenderElementProps> = ({ attributes, children, element }) => {
   return (
-    <div className="relative">
-      <h1 {...attributes} className="text-4xl font-serif py-2">
-        {children}
-      </h1>
-      {isEmpty && isFirstNode && (
-        <span className="absolute top-0 left-0 text-neutral-500 pointer-events-none text-4xl font-serif py-2">
-          Title
-        </span>
-      )}
+    <div className="mb-4">
+      <div className="relative">
+        <h1
+          {...attributes}
+          className="text-5xl font-serif outline-none"
+        >
+          {children}
+        </h1>
+        {element.children[0].text === '' && (
+          <span className="absolute top-0 left-0 text-gray-500 pointer-events-none text-5xl font-serif">
+            Title
+          </span>
+        )}
+      </div>
+      <div className="h-[1px] bg-gray-700 opacity-50 mt-4" />
     </div>
   )
 }
 
 export default TitleElement
+
