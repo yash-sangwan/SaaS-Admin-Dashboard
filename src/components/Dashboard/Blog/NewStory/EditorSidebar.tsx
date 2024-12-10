@@ -4,6 +4,7 @@ import React, { useRef } from 'react'
 import SidebarItem from './SidebarItem'
 import { sidebarConfig } from './config/sidebarConfig'
 import { SidebarItem as SidebarItemType } from './types/sidebarItems'
+import { Code2 } from 'lucide-react'
 
 interface EditorSidebarProps {
   onAddItem: (item: SidebarItemType, file?: File) => void
@@ -31,6 +32,17 @@ const EditorSidebar: React.FC<EditorSidebarProps> = ({ onAddItem }) => {
       }
     }
   }
+
+  const sidebarItems: SidebarItemType[] = [
+    ...sidebarConfig.flatMap(section => section.items),
+    {
+      id: 'code-block',
+      name: 'Code Block',
+      icon: Code2,
+      type: 'structure'
+    },
+  ]
+
 
   return (
     <div className="fixed left-0 top-16 w-72 h-[calc(100vh-4rem)] space-y-8 bg-black border-r border-gray-400/20 p-6 overflow-y-auto">

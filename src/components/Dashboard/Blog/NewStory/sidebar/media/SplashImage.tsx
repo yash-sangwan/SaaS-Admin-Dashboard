@@ -8,7 +8,8 @@ import {
   DialogContent,
 } from "@/components/ui/dialog"
 import { Button } from '@/components/ui/button'
-import { AlignLeft, AlignCenter, AlignRight, Trash2, Minimize2, Maximize2 } from 'lucide-react'
+import { AlignLeft, AlignCenter, AlignRight, Trash2, Minimize2, Maximize2, Type } from 'lucide-react'
+import AltTextDialog from './AltTextDialog'
 
 interface SplashImageProps {
   attributes: any
@@ -21,6 +22,7 @@ const SplashImage: React.FC<SplashImageProps> = ({ attributes, children, element
   const path = ReactEditor.findPath(editor, element)
   const [open, setOpen] = useState(!element.url)
   const [isFullSize, setIsFullSize] = useState(true)
+  const [showAltTextDialog, setShowAltTextDialog] = useState(false)
 
   const wrapperStyle: CSSProperties = {
     position: 'relative',
@@ -69,10 +71,24 @@ const SplashImage: React.FC<SplashImageProps> = ({ attributes, children, element
     setIsFullSize(prev => !prev)
   }, [])
 
+  const handleAltTextSave = (altText: string) => {
+    Transforms.setNodes(
+      editor,
+      { altText },
+      { at: path }
+    )
+    // Save alt text to localStorage
+    const altTexts = JSON.parse(localStorage.getItem('editor-alt-texts') || '{}')
+    if (element.url) {
+      altTexts[element.url] = altText
+      localStorage.setItem('editor-alt-texts', JSON.stringify(altTexts))
+    }
+  }
+
   return (
     <div {...attributes}>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-[850px] p-6 gap-0 bg-black border-[#282828]">
+        <DialogContent className="sm:max-w-[850px] p-6 gap-0 bg-[#121212] border-[#282828] text-white">
           <UnsplashSearch onImageSelect={handleImageSelect} />
         </DialogContent>
       </Dialog>
@@ -81,15 +97,15 @@ const SplashImage: React.FC<SplashImageProps> = ({ attributes, children, element
           <div style={{ position: 'relative', display: 'inline-block', width: '100%' }}>
             <img
               src={element.url}
-              alt="Splash"
+              alt={element.altText || "Splash"}
               style={imageStyle}
             />
             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-2 bg-black/80 p-2 rounded-lg transition-opacity">
               <Button
                 variant="ghost"
                 size="icon"
-                className={`h-8 w-8 text-white hover:text-white hover:bg-gray-800 ${
-                  element.position === 'left' ? 'bg-green-500' : ''
+                className={`h-8 w-8 text-white hover:text-white hover:bg-[#282828] ${
+                  element.position === 'left' ? 'bg-[#1DB954]' : ''
                 }`}
                 onClick={() => handlePosition('left')}
                 aria-label="Align left"
@@ -99,8 +115,8 @@ const SplashImage: React.FC<SplashImageProps> = ({ attributes, children, element
               <Button
                 variant="ghost"
                 size="icon"
-                className={`h-8 w-8 text-white hover:text-white hover:bg-gray-800 ${
-                  element.position === 'center' ? 'bg-green-500' : ''
+                className={`h-8 w-8 text-white hover:text-white hover:bg-[#282828] ${
+                  element.position === 'center' ? 'bg-[#1DB954]' : ''
                 }`}
                 onClick={() => handlePosition('center')}
                 aria-label="Align center"
@@ -110,8 +126,8 @@ const SplashImage: React.FC<SplashImageProps> = ({ attributes, children, element
               <Button
                 variant="ghost"
                 size="icon"
-                className={`h-8 w-8 text-white hover:text-white hover:bg-gray-800 ${
-                  element.position === 'right' ? 'bg-green-500' : ''
+                className={`h-8 w-8 text-white hover:text-white hover:bg-[#282828] ${
+                  element.position === 'right' ? 'bg-[#1DB954]' : ''
                 }`}
                 onClick={() => handlePosition('right')}
                 aria-label="Align right"
@@ -121,8 +137,8 @@ const SplashImage: React.FC<SplashImageProps> = ({ attributes, children, element
               <Button
                 variant="ghost"
                 size="icon"
-                className={`h-8 w-8 text-white hover:text-white hover:bg-gray-800 ${
-                  !isFullSize ? 'bg-green-500' : ''
+                className={`h-8 w-8 text-white hover:text-white hover:bg-[#282828] ${
+                  !isFullSize ? 'bg-[#1DB954]' : ''
                 }`}
                 onClick={handleSizeToggle}
                 aria-label="Minimize image"
@@ -132,8 +148,8 @@ const SplashImage: React.FC<SplashImageProps> = ({ attributes, children, element
               <Button
                 variant="ghost"
                 size="icon"
-                className={`h-8 w-8 text-white hover:text-white hover:bg-gray-800 ${
-                  isFullSize ? 'bg-green-500' : ''
+                className={`h-8 w-8 text-white hover:text-white hover:bg-[#282828] ${
+                  isFullSize ? 'bg-[#1DB954]' : ''
                 }`}
                 onClick={handleSizeToggle}
                 aria-label="Maximize image"
@@ -143,7 +159,16 @@ const SplashImage: React.FC<SplashImageProps> = ({ attributes, children, element
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-white hover:text-white hover:bg-gray-800"
+                className="h-8 w-8 text-white hover:text-white hover:bg-[#282828]"
+                onClick={() => setShowAltTextDialog(true)}
+                aria-label="Add alt text"
+              >
+                <Type className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-white hover:text-white hover:bg-[#282828]"
                 onClick={handleDelete}
                 aria-label="Delete"
               >
@@ -154,6 +179,12 @@ const SplashImage: React.FC<SplashImageProps> = ({ attributes, children, element
         </div>
       )}
       {children}
+      <AltTextDialog
+        isOpen={showAltTextDialog}
+        onClose={() => setShowAltTextDialog(false)}
+        onSave={handleAltTextSave}
+        initialAltText={element.altText}
+      />
     </div>
   )
 }

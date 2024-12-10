@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Search, Play } from 'lucide-react'
 
 const getYouTubeVideoId = (url: string) => {
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
   const match = url.match(regExp);
   return (match && match[2].length === 11) ? match[2] : null;
 }
@@ -43,7 +43,7 @@ const VideoSearch: React.FC<VideoSearchProps> = ({ onVideoSelect }) => {
             type="text"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="Paste YouTube video link and press Enter"
+            placeholder="Paste YouTube video or shorts link and press Enter"
             className="w-full pl-10 pr-4 h-12 bg-[#121212] border-[#282828] text-[#A7A7A7] placeholder-[#727272] focus:border-[#404040]"
           />
         </form>

@@ -1,5 +1,3 @@
-
-
 import React, { useState, useCallback } from 'react'
 import { RenderElementProps, useSelected, useFocused } from 'slate-react'
 import { Transforms } from 'slate'
@@ -98,7 +96,7 @@ const ContentElement: React.FC<ContentElementProps> = ({
       <div 
         className={`relative`}
       >
-        <div {...attributes} className="text-xl leading-relaxed">
+        <div {...attributes} className="text-xl leading-relaxed caret-white">
           {children}
         </div>
         {isEmpty && showPlaceholder && element.type === 'paragraph' && (

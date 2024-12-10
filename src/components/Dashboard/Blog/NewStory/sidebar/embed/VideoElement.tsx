@@ -77,13 +77,19 @@ const VideoElement: React.FC<VideoElementProps> = ({ attributes, children, eleme
     setShowOptions(true)
   }
 
+  const getYouTubeVideoId = (url: string): string => {
+    const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[7].length == 11) ? match[7] : '';
+  }
+
   return (
     <div {...attributes}>
       <div contentEditable={false} style={wrapperStyle}>
         <div style={videoContainerStyle} onClick={handleVideoClick}>
           {isPlaying ? (
             <iframe
-              src={`${element.url}?autoplay=1`}
+              src={`https://www.youtube.com/embed/${getYouTubeVideoId(element.url)}?autoplay=1`}
               style={videoStyle}
               allowFullScreen
               allow="autoplay; encrypted-media"

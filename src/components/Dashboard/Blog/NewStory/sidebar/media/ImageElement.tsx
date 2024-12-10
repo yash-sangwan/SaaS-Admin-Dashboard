@@ -1,9 +1,10 @@
 import React, { useState, useCallback, useEffect, CSSProperties } from 'react'
 import { RenderElementProps, useSelected, useFocused, ReactEditor, useSlate } from 'slate-react'
 import { Transforms } from 'slate'
-import { ImageElement as ImageElementType } from './CustomTypes'
+import { ImageElement as ImageElementType } from '../../CustomTypes'
 import { Button } from '@/components/ui/button'
-import { AlignLeft, AlignCenter, AlignRight, Trash2, Minimize2, Maximize2 } from 'lucide-react'
+import { AlignLeft, AlignCenter, AlignRight, Trash2, Minimize2, Maximize2, Type } from 'lucide-react'
+import AltTextDialog from './AltTextDialog'
 
 type ImageElementProps = RenderElementProps & {
   element: ImageElementType
@@ -16,7 +17,7 @@ const ImageElement: React.FC<ImageElementProps> = ({ attributes, children, eleme
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [isFullSize, setIsFullSize] = useState(true)
   const [canResize, setCanResize] = useState(false)
-  // const [aspectRatio, setAspectRatio] = useState(16 / 9) // Default aspect ratio
+  const [showAltTextDialog, setShowAltTextDialog] = useState(false)
   const selected = useSelected()
   const focused = useFocused()
 
@@ -86,13 +87,25 @@ const ImageElement: React.FC<ImageElementProps> = ({ attributes, children, eleme
     setShowOptions(true)
   }
 
+  const handleAltTextSave = (altText: string) => {
+    Transforms.setNodes(
+      editor,
+      { altText },
+      { at: path }
+    )
+    // Save alt text to localStorage
+    const altTexts = JSON.parse(localStorage.getItem('editor-alt-texts') || '{}')
+    altTexts[element.url] = altText
+    localStorage.setItem('editor-alt-texts', JSON.stringify(altTexts))
+  }
+
   return (
     <div {...attributes}>
       <div contentEditable={false} style={wrapperStyle}>
         <div style={imageContainerStyle}>
           <img
             src={element.url}
-            alt="Inserted content"
+            alt={element.altText || "Inserted content"}
             style={imageStyle}
             width={dimensions.width}
             height={dimensions.height}
@@ -103,8 +116,8 @@ const ImageElement: React.FC<ImageElementProps> = ({ attributes, children, eleme
               <Button
                 variant="ghost"
                 size="icon"
-                className={`h-8 w-8 text-white hover:text-white hover:bg-gray-800 ${
-                  element.position === 'left' ? 'bg-green-500' : ''
+                className={`h-8 w-8 text-white hover:text-white hover:bg-[#282828] ${
+                  element.position === 'left' ? 'bg-[#1DB954]' : ''
                 }`}
                 onClick={() => handlePosition('left')}
                 aria-label="Align left"
@@ -114,8 +127,8 @@ const ImageElement: React.FC<ImageElementProps> = ({ attributes, children, eleme
               <Button
                 variant="ghost"
                 size="icon"
-                className={`h-8 w-8 text-white hover:text-white hover:bg-gray-800 ${
-                  element.position === 'center' ? 'bg-green-500' : ''
+                className={`h-8 w-8 text-white hover:text-white hover:bg-[#282828] ${
+                  element.position === 'center' ? 'bg-[#1DB954]' : ''
                 }`}
                 onClick={() => handlePosition('center')}
                 aria-label="Align center"
@@ -125,8 +138,8 @@ const ImageElement: React.FC<ImageElementProps> = ({ attributes, children, eleme
               <Button
                 variant="ghost"
                 size="icon"
-                className={`h-8 w-8 text-white hover:text-white hover:bg-gray-800 ${
-                  element.position === 'right' ? 'bg-green-500' : ''
+                className={`h-8 w-8 text-white hover:text-white hover:bg-[#282828] ${
+                  element.position === 'right' ? 'bg-[#1DB954]' : ''
                 }`}
                 onClick={() => handlePosition('right')}
                 aria-label="Align right"
@@ -138,8 +151,8 @@ const ImageElement: React.FC<ImageElementProps> = ({ attributes, children, eleme
                   <Button
                     variant="ghost"
                     size="icon"
-                    className={`h-8 w-8 text-white hover:text-white hover:bg-gray-800 ${
-                      !isFullSize ? 'bg-green-500' : ''
+                    className={`h-8 w-8 text-white hover:text-white hover:bg-[#282828] ${
+                      !isFullSize ? 'bg-[#1DB954]' : ''
                     }`}
                     onClick={handleSizeToggle}
                     aria-label="Minimize image"
@@ -149,8 +162,8 @@ const ImageElement: React.FC<ImageElementProps> = ({ attributes, children, eleme
                   <Button
                     variant="ghost"
                     size="icon"
-                    className={`h-8 w-8 text-white hover:text-white hover:bg-gray-800 ${
-                      isFullSize ? 'bg-green-500' : ''
+                    className={`h-8 w-8 text-white hover:text-white hover:bg-[#282828] ${
+                      isFullSize ? 'bg-[#1DB954]' : ''
                     }`}
                     onClick={handleSizeToggle}
                     aria-label="Maximize image"
@@ -162,7 +175,16 @@ const ImageElement: React.FC<ImageElementProps> = ({ attributes, children, eleme
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-white hover:text-white hover:bg-gray-800"
+                className="h-8 w-8 text-white hover:text-white hover:bg-[#282828]"
+                onClick={() => setShowAltTextDialog(true)}
+                aria-label="Add alt text"
+              >
+                <Type className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-white hover:text-white hover:bg-[#282828]"
                 onClick={handleDelete}
                 aria-label="Delete"
               >
@@ -173,6 +195,12 @@ const ImageElement: React.FC<ImageElementProps> = ({ attributes, children, eleme
         </div>
       </div>
       {children}
+      <AltTextDialog
+        isOpen={showAltTextDialog}
+        onClose={() => setShowAltTextDialog(false)}
+        onSave={handleAltTextSave}
+        initialAltText={element.altText}
+      />
     </div>
   )
 }

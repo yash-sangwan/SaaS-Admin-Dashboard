@@ -7,7 +7,7 @@ const TitleElement: React.FC<RenderElementProps> = ({ attributes, children, elem
       <div className="relative">
         <h1
           {...attributes}
-          className="text-5xl font-serif outline-none"
+          className="text-5xl font-serif outline-none caret-white"
         >
           {children}
         </h1>
